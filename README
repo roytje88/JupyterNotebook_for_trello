@@ -1,1 +1,18 @@
-Een github page om notebooks te kunnen delen.
+files:
+
+Trello to Excel.ipynb: 
+collection
+
+variables: 
+Creation of .variables file with URLs and Python libraries which are needed.
+
+jsonparse:
+Get the JSON and parse them into objects
+
+trelloattachments(WIP):
+Script to append a trello attachment to the dictionary in the right card.
+At the moment it only creates an entry when the attached card is on the same board (due to the hardcoded board-id in the variables-file).
+
+
+
+The .PY files are an exact copy of the .iPyNB files.
