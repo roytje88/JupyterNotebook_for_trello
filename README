@@ -13,6 +13,8 @@ trelloattachments(WIP):
 Script to append a trello attachment to the dictionary in the right card.
 At the moment it only creates an entry when the attached card is on the same board (due to the hardcoded board-id in the variables-file).
 
-
+cardsperdate:
+Create a Pyton Object with date-key of the past 100 days and count how many cards were in the scrum statuses (To do, Doing & Done).
+Also appended the key/values DateStarted, DateDone and the leadtime of the card if it is done.
 
 The .PY files are an exact copy of the .iPyNB files.
