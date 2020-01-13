@@ -65,7 +65,7 @@ for i in cards:
             if j == k['id']:
                     kaarten[i['id']]['members'][k['id']] = k['fullName']
     if i['due'] != None:
-        kaarten[i['id']]['due'] = datetime.strptime(i['due'][0:10],'%Y-%m-%d').date()
+        kaarten[i['id']]['due'] = datetime.strptime(i['due'][0:19],'%Y-%m-%dT%H:%M:%S')
     for j in i['labels']:
         kaarten[i['id']]['labels'][j['name']] = j['id']
                     
@@ -81,7 +81,7 @@ if customfields_dict != {}:
                 for l,m in customfields_dict.items():
                     for n,o in m.items():
                         if k['idCustomField'] == l:
-                            j[n] = datetime.strptime(k['value']['date'][0:10],'%Y-%m-%d').date()
+                            j[n] = datetime.strptime(k['value']['date'][0:19],'%Y-%m-%dT%H:%M:%S')
             else:
                 for l,m in customfields_dict.items():
                     for n,o in m.items():
