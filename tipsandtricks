@@ -1,0 +1,5 @@
+I initially created the .py files (with jupyter nbconvert) so I could run the commands of another notebook. But with 
+%run ./called_notebook.ipynb
+, the notebook itself will be executed!
+
+Source: https://stackoverflow.com/questions/49817409/running-a-jupyter-notebook-from-another-notebook
