@@ -56,7 +56,9 @@ for i in cards:
                         'labels': {},
                         'members': {},
                         'sjabloon': i['isTemplate'],
-                        'due': None
+                        'due': None,
+                        'closed': i['closed'],
+			'attachments': {}
                        }
     for j in i['idMembers']:
 
@@ -68,6 +70,12 @@ for i in cards:
         kaarten[i['id']]['due'] = datetime.strptime(i['due'][0:19],'%Y-%m-%dT%H:%M:%S')
     for j in i['labels']:
         kaarten[i['id']]['labels'][j['name']] = j['id']
+    for j in i['attachments']:
+        try:
+            if j['url'][0:21]== 'https://trello.com/c/':
+                kaarten[i['id']]['attachments'][j['url'][21:29]] = None
+        except:
+            pass
                     
 if customfields_dict != {}:
     for i,j in customfields_dict.items():
