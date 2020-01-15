@@ -18,6 +18,9 @@ Script to append a trello attachment to the dictionary in the right card.
 
 
 
+TODO:
+upload files (variables,jsonparse,cardsperdate,sendexcel)
+edit Variables to also include Gmail settings(user,pass)
 
 
 
