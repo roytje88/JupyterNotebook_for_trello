@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 exec(open("./variables.py").read())
 
 
-# In[2]:
+# In[ ]:
 
 
 cards = json.loads(json.dumps(requests.get(url_cards).json()))
@@ -17,7 +17,7 @@ labels = json.loads(json.dumps(requests.get(url_labels).json()))
 members = json.loads(json.dumps(requests.get(url_members).json()))
 
 
-# In[3]:
+# In[ ]:
 
 
 customfields_dict = {}
@@ -44,13 +44,13 @@ for i,j in customfields_dict.items():
                 pass
 
 
-# In[4]:
+# In[ ]:
 
 
 kaarten = {}
 for i in cards:
     kaarten[i['id']] = {'name': i['name'],
-                        'id': i['id'],
+                        'cardid': i['id'],
                         'idlist': i['idList'],
                         'customfields': i['customFieldItems'],
                         'labels': {},
@@ -58,7 +58,7 @@ for i in cards:
                         'sjabloon': i['isTemplate'],
                         'due': None,
                         'closed': i['closed'],
-			'attachments': {}
+                        'attachments': {}
                        }
     for j in i['idMembers']:
 
@@ -69,7 +69,7 @@ for i in cards:
     if i['due'] != None:
         kaarten[i['id']]['due'] = datetime.strptime(i['due'][0:19],'%Y-%m-%dT%H:%M:%S')
     for j in i['labels']:
-        kaarten[i['id']]['labels'][j['name']] = j['id']
+        kaarten[i['id']]['labels'][j['id']] = j['name']
     for j in i['attachments']:
         try:
             if j['url'][0:21]== 'https://trello.com/c/':
@@ -114,7 +114,7 @@ for i,j in kaarten.items():
         j['status'] = 'Done'
     del j['customfields']
     del j['idlist']
-    del j['id']
+
 
 
 

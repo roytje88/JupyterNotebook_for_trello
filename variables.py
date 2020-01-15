@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[1]:
 
 
 from matplotlib import pyplot as plt
@@ -18,9 +18,20 @@ from openpyxl import load_workbook
 import os
 import xlsxwriter
 import xlrd
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 
-# In[4]:
+# In[ ]:
+
+
+
+
+
+# In[ ]:
 
 
 if not os.path.exists('.variables'):
@@ -51,6 +62,14 @@ if not os.path.exists('.variables'):
     filenamewithoutextension = input("Enter the name for the excel file (without .xlsx)")
     filenamewithextension = filenamewithoutextension+".xlsx"
     print()
+    email = input("Enter your e-mailaccount: ")
+    print()
+    password = input("Enter your e-mail password: ")
+    print()
+    toaddr = input("Enter e-mail of recipient: ")
+    print()
+    subj = input("Enter subject: ")    
+    print()
     print()
     file = open('.variables', 'w')
     file = open('.variables', 'a')
@@ -69,11 +88,19 @@ if not os.path.exists('.variables'):
     file.write(donelists)
     file.write('\n')
     file.write(filenamewithextension)
+    file.write('\n')
+    file.write(email)
+    file.write('\n')
+    file.write(password)
+    file.write('\n')
+    file.write(toaddr)
+    file.write('\n')
+    file.write(subj)
     file.close()
     print('Your variables are saved in the file \'.variables\'. Please do not delete this file.')
 
 
-# In[5]:
+# In[ ]:
 
 
 f = open('.variables', 'r')
@@ -95,6 +122,10 @@ lijstenblocked = variables[4].split(',')
 lijstendoing = variables[5].split(',')
 lijstendone = variables[6].split(',')
 excelfile = variables[7]
+email = variables[8]
+password = variables[9]
+toaddr = variables[10]
+subj = variables[11]
 
 lijstenforscrum = []
 for i in lijstenbeginnen:
@@ -108,7 +139,7 @@ lijstenforscrum.extend(lijstendone)
 f.close()
 
 
-# In[7]:
+# In[ ]:
 
 
 keys = "key="+api_key+"&token="+api_token
@@ -122,7 +153,7 @@ url_members = board_url+"/members?"+keys
 statussen = ['Nog starten','Blocked','Doing','Done']
 
 
-# In[8]:
+# In[ ]:
 
 
 cards = json.loads(json.dumps(requests.get(url_cards).json()))
@@ -132,7 +163,7 @@ labels = json.loads(json.dumps(requests.get(url_labels).json()))
 members = json.loads(json.dumps(requests.get(url_members).json()))
 
 
-# In[11]:
+# In[3]:
 
 
 def idtodate(cardid):
@@ -142,15 +173,15 @@ def idtodate(cardid):
     return timedate
 
 
-# In[14]:
+# In[2]:
 
 
 def schrijfnaarexcel(countdict,excelfile,sheetname):
     if not os.path.exists(excelfile):
         workbook = xlsxwriter.Workbook(excelfile)
         worksheet = workbook.add_worksheet("Lijsten")
-        for i in statussen:
-            worksheet = workbook.add_worksheet(i)
+#        for i in statussen:
+#            worksheet = workbook.add_worksheet(i)
         worksheet = workbook.add_worksheet("Vervallen")
         workbook.close() 
     counts = []
@@ -168,7 +199,12 @@ def schrijfnaarexcel(countdict,excelfile,sheetname):
     writer = pd.ExcelWriter(excelfile,engine='openpyxl')
     writer.book = book
     writer.sheets = {ws.title: ws for ws in book.worksheets}
-    valuecount = writer.sheets[sheetname]['B1'].value
+    try:
+        valuecount = writer.sheets[sheetname]['B1'].value
+    except:
+        workbook = xlsxwriter.Workbook(excelfile)
+        worksheet = workbook.add_worksheet(sheetname)
+        valuecount = writer.sheets[sheetname]['B1'].value
     if valuecount == 0 or valuecount == None:
         df_columnnames.to_excel(writer,sheet_name=sheetname,startrow=1, index=False,header=False)
         writer.sheets[sheetname]['A1'].value = 'Counter'

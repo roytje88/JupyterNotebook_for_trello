@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 exec(open("./jsonparse.py").read())
 
 
-# In[2]:
+# In[ ]:
 
 
 def actions_card(idofcard):
@@ -15,14 +15,14 @@ def actions_card(idofcard):
     return objectname
 
 
-# In[3]:
+# In[ ]:
 
 
 for i,j in kaarten.items():
     j['actions'] = actions_card(i)
 
 
-# In[4]:
+# In[ ]:
 
 
 for i,j in kaarten.items():
@@ -38,7 +38,7 @@ for i,j in kaarten.items():
             pass
 
 
-# In[12]:
+# In[ ]:
 
 
 for i,j in kaarten.items():
@@ -82,10 +82,10 @@ for i,j in kaarten.items():
     del j['movements']
 
 
-# In[14]:
+# In[ ]:
 
 
-datelist = pd.date_range(end = pd.datetime.today(), periods = 100).to_pydatetime().tolist()
+datelist = pd.date_range(end = pd.datetime.today(), periods = 200).to_pydatetime().tolist()
 datesdict = {}
 for i in datelist:
     datesdict[str(i.date())]= {}
@@ -94,5 +94,58 @@ for i in datelist:
 # In[ ]:
 
 
+now = datetime.now().date()
+for i,j in datesdict.items():
+    datekey = datetime.strptime(i,'%Y-%m-%d').date()
+    j['To do'] = 0
+    j['Doing'] = 0
+    j['Done'] = 0
+    for k,l in kaarten.items():
+        if l['created'].date() <= datekey <= now:
 
+            j['To do'] +=1
+
+        if l['datestarted'] != None:
+            if l['datestarted'].date() <= datekey:
+                j['To do'] -=1
+                j['Doing'] +=1
+        if l['datedone'] != None:
+            if l['datedone'].date() <= datekey:
+                j['Doing'] -= 1
+                j['Done'] += 1
+
+
+# In[ ]:
+
+
+in_out = {}
+for i in datelist:
+    in_out[str(i.date())]= {}
+for i,j in in_out.items():
+    j['In'] = 0
+    j['Out'] = 0
+    for k,l in kaarten.items():
+        for m,n in l.items():
+            x = 0
+            y = 0
+            if m=='created':
+                if i==str(n)[0:10]:
+                    x += 1
+                    j['In'] += 1
+            if m=='datedone':
+                if i==str(n)[0:10]:
+                    y += 1
+                    j['Out'] += 1
+for i,j in in_out.items():
+    i = datetime.strptime(i,'%Y-%m-%d')
+
+
+# In[1]:
+
+
+for i,j in datesdict.items():
+    for k,l in in_out.items():
+        if i==k:
+            j['In'] = l['In']
+            j['Out'] = l['Out']
 
