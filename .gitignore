@@ -1,0 +1,5 @@
+.git/
+.ipynb_checkpoints/
+.variables
+configuration.txt
+credentials.txt
