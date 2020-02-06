@@ -1,20 +1,10 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# ## Import libraries
-
-# In[ ]:
-
+#Import libraries
 
 import requests,json,os, pprint,requests
 import pandas as pd
 from datetime import date,datetime,timedelta
 
-
-# ### Load configuration and credentials
-
-# In[ ]:
-
+#Load configuration and credentials
 
 if os.path.exists('configuration.txt'):
     with open('configuration.txt') as json_file:
@@ -28,12 +18,7 @@ if os.path.exists('credentials.txt'):
 else:
     print('No credentials found. To create one, run Setup!')
 
-
-# ### Create URLs
-
-# In[ ]:
-
-
+#Create URLs
 keys = "key="+credentials.get('api_key')+"&token="+credentials.get('api_token')
 trello_base_url = "https://api.trello.com/1/"
 board_url = trello_base_url+"boards/"+config.get('boardid')
@@ -43,23 +28,14 @@ url_customfields = board_url+"/customFields?"+keys
 url_labels = board_url+"/labels?"+keys
 url_members = board_url+"/members?"+keys
 
-
-# ### Get the JSON objects and parse them
-
-# In[ ]:
-
-
+# Get the JSON objects and parse them
 cards = json.loads(json.dumps(requests.get(url_cards).json()))
 lists = json.loads(json.dumps(requests.get(url_lists).json()))
 customfields = json.loads(json.dumps(requests.get(url_customfields).json()))
 labels = json.loads(json.dumps(requests.get(url_labels).json()))
 members = json.loads(json.dumps(requests.get(url_members).json()))
 
-
-# ### Create dictionary for custom fields (if exists)
-
-# In[ ]:
-
+# Create dictionary for custom fields (if exists)
 
 customfields_dict = {}
 for i in customfields:
@@ -75,11 +51,7 @@ for i in customfields:
         for j in i['options']:
             customfields_dict[i['id']][i['name']]['options'][j['id']] =  j['value']['text']
 
-
-# ### If there are custom fields with dates, treat them differently
-
-# In[ ]:
-
+#If there are custom fields with dates, treat them differently
 
 customfieldsmetdate = []
 for i,j in customfields_dict.items():
@@ -90,11 +62,7 @@ for i,j in customfields_dict.items():
             except:
                 pass
 
-
-# ## Create a list for all the chosen lists in the configuration
-
-# In[ ]:
-
+# Create a list for all the chosen lists in the configuration
 
 chosenlists = []
 for i in config.get('notstarted'):
@@ -103,11 +71,7 @@ chosenlists.extend(config.get('blocked'))
 chosenlists.extend(config.get('doing'))
 chosenlists.extend(config.get('done'))
 
-
-# ### Create function to get the hashed date from the card ID
-
-# In[ ]:
-
+# Create function to get the hashed date from the card # IDEA:
 
 def idtodate(cardid):
     hex = cardid[0:8]
@@ -115,11 +79,7 @@ def idtodate(cardid):
     timedate = datetime.fromtimestamp(timestamp)
     return timedate
 
-
-# ### Create dictionary with all cards
-
-# In[ ]:
-
+# Create dictionary with all cards
 
 kaarten = {}
 for i in cards:
@@ -152,11 +112,7 @@ for i in cards:
         except:
             pass
 
-
-# ### Add custom fields if they exist
-
-# In[ ]:
-
+# Add custom fields if they exist
 
 if customfields_dict != {}:
     for i,j in customfields_dict.items():
@@ -180,11 +136,7 @@ if customfields_dict != {}:
                                     if k['idValue'] == r:
                                         j[n] = s
 
-
-# ### Add the statuses (Not started, Doing, Blocked and Done), based on the configuration
-
-# In[ ]:
-
+# Add the statuses (Not started, Doing, Blocked and Done), based on the configuration
 
 for i,j in kaarten.items():
     date = idtodate(i)
@@ -204,32 +156,21 @@ for i,j in kaarten.items():
     del j['customfields']
     del j['idlist']
 
-
-# ### Give the status Archived if the card is closed and not done
-
-# In[ ]:
-
+# Give the status Archived if the card is closed and not done
 
 for i,j in kaarten.items():
     if j['closed'] == True and j['status'] != 'Done':
         j['status'] = 'Archived'
 
 
-# ### Create object with lists that are not chosen
-
-# In[ ]:
-
+# Create object with lists that are not chosen
 
 liststodelete = []
 for i in lists:
     if i['name'] not in chosenlists:
         liststodelete.append(i['name'])
 
-
-# ### Create object with all cards that should be deleted (ignored)
-
-# In[ ]:
-
+# Create object with all cards that should be deleted (ignored)
 
 cardstodelete = []
 for i,j in kaarten.items():
@@ -238,50 +179,48 @@ for i,j in kaarten.items():
     elif j['list'] in liststodelete:
         cardstodelete.append(i)
 
-
-# ### Delete the cards in the object 'cardstodelete'
-
-# In[ ]:
-
+# Delete the cards in the object 'cardstodelete'
 
 for i in cardstodelete:
     if i in kaarten:
         del kaarten[i]
 
+# Get all actions from the board (if limit of 1000 exceeds, repeat the API request)
 
-# ### Create function to get all actions from a card
+actions = []
+before = datetime.now().strftime("%Y-%d-%mT%H:%M:%S"+".000Z")
+x = 1000
+while x == 1000:
+    actionsurl = board_url+"/actions?before="+before+"&limit=1000&filter=updateCard&"+keys
+    temp = json.loads(json.dumps(requests.get(actionsurl).json()))
+    tmp = []
+    for i in temp:
+        actions.append(i)
+        for j,k in i.items():
+            if j == 'date':
+                tmp.append(k)
+    before = min(tmp)
+    x = len(temp)
 
-# In[ ]:
+# Add the actions to the appropiate card
 
+for n,o in kaarten.items():
+    o['actions'] = []
+    for i in actions:
+        for j,k in i.items():
+            if j == 'data':
+                for l,m in k.items():
+                    if l == 'card':
+                        if n == m['id']:
+                            o['actions'].append(i)
 
-def actions_card(idofcard):
-    objectname = json.loads(json.dumps(requests.get(trello_base_url+"cards/"+idofcard+"/actions?actions_limit=1000&"+keys).json()))
-    return objectname
-
-
-# ### Get the actions from all cards
-
-# In[ ]:
-
-
-for i,j in kaarten.items():
-    j['actions'] = actions_card(i)
-
-
-# ### Create function to convert the JSON Time in string format to DateTime
-
-# In[ ]:
-
+# Create function to convert the JSON Time in string format to DateTime
 
 def dateCalc(date):
     newdate = datetime.strptime(date[0:19],'%Y-%m-%dT%H:%M:%S')
     return newdate
 
-
-# ### Get all list movements of all cards
-
-# In[ ]:
-
+# Get all list movements of all cards
 
 for i,j in kaarten.items():
     j['listmovements'] = {}
@@ -292,11 +231,7 @@ for i,j in kaarten.items():
             except:
                 pass
 
-
-# ### Determine the right list movements with date and time (including the fist list)
-
-# In[ ]:
-
+# Determine the right list movements with date and time (including the fist list)
 
 for i,j in kaarten.items():
     j['movements'] = {}
@@ -317,11 +252,7 @@ for i,j in kaarten.items():
 for i,j in kaarten.items():
     del j['actions']
 
-
-# ### Because listnames could be changed, the list ID was added in previous commands. With this code, the current listname is displayed
-
-# In[ ]:
-
+# Because listnames could be changed, the list ID was added in previous commands. With this code, the current listname is displayed
 
 historicallists = []
 historicallists.extend(chosenlists)
@@ -334,11 +265,7 @@ for i,j in kaarten.items():
                     l[m] = o['name']
                     historicallists.append(o['name'])
 
-
-# ### Create a dictionary with date-keys (past 400 days)
-
-# In[ ]:
-
+# Create a dictionary with date-keys (past 400 days)
 
 datesdict = {}
 now = datetime.now().date()
@@ -347,11 +274,7 @@ numdays = 400
 for x in range (0, numdays):
     datesdict[str(now - timedelta(days = x))] = {}
 
-
-# ### Determine how many cards were in what list on the dates in the Dates-dictionary
-
-# In[ ]:
-
+# Determine how many cards were in what list on the dates in the Dates-dictionary
 
 for i,j in datesdict.items():
     datekey = datetime.strptime(i,'%Y-%m-%d').date()
@@ -368,11 +291,21 @@ for i,j in datesdict.items():
                         else:
                             j[o['listAfter']] += 1
 
+# If all values are zero for a date, that date is useless, so deleting..
 
-# ### If all values are zero for a date, that date is useless, so deleting..
+datetodelete = []
+for i,j in datesdict.items():
+    j['count'] = 0
+    for k in chosenlists:
+        j['count'] += j.get(k)
+    if j['count'] == 0:
+        datetodelete.append(i)
+    del j['count']
+for i in datetodelete:
+    if i in datesdict:
+        del datesdict[i]
 
-# In[ ]:
-
+# Create a few extra fields with dates and determine these dates with the list movements
 
 for i,j in kaarten.items():
     j['datedone'] = None
@@ -411,21 +344,13 @@ for i,j in kaarten.items():
             tmp.append(k)
             j['datelastblocked'] = max(tmp)
 
-
-# ### Create a temporary list with all dates from the Dates dictionary
-
-# In[ ]:
-
+# Create a temporary list with all dates from the Dates dictionary
 
 datelist = []
 for i in datesdict.keys():
     datelist.append(i)
 
-
-# ### Create a dictionary for in and out and determine values with dates already in the cards dictionary
-
-# In[ ]:
-
+# Create a dictionary for in and out and determine values with dates already in the cards dictionary
 
 in_out = {}
 for i in datelist:
@@ -453,11 +378,7 @@ for i,j in datesdict.items():
             j['In'] = l['In']
             j['Out'] = l['Out']
 
-
-# ### Create function to ouput all cards to excel
-
-# In[ ]:
-
+# Create function to ouput all cards to excel
 
 def excelalldata():
     import pandas as pd
@@ -489,20 +410,12 @@ def excelalldata():
         df3 = pd.merge(df1,df2,on='cardid', how='left')
         df3.to_excel(config.get('excelfile'))
 
-
-# ### Create function to output the timeline to excel (WIP)
-
-# In[ ]:
-
+# Create function to output the timeline to excel
 
 def exceltimeline():
     print('exceltimeline is not defined yet.')
 
-
-# ### Create function to output the timeline to Google Sheets
-
-# In[ ]:
-
+# Create function to output the timeline to Google Sheets
 
 def timelinetosheets(dictionary,sheetid,worksheet):
     import gspread
@@ -531,11 +444,7 @@ def timelinetosheets(dictionary,sheetid,worksheet):
     sheet = wks.worksheet(worksheet)
     sheet.update_acell('A1', 'Date')
 
-
-# ### Create function to output all data to Google Sheets
-
-# In[ ]:
-
+# Create function to output all data to Google Sheets
 
 def alldatatosheets(dictionary,sheetid,worksheet):
     import gspread
@@ -598,23 +507,15 @@ def alldatatosheets(dictionary,sheetid,worksheet):
 
     d2g.upload(dataframe, sheetid, worksheet, credentials=gcredentials, row_names=True)
 
-
-# ### Run all function with value True in the configuration
-
-# In[ ]:
-
+# Run all function with value True in the configuration
 
 if config['scriptoptions']['excelalldata'] == True:
-    print('Not scripted yet.')
-#    excelalldata()
+    excelalldata()
 if config['scriptoptions']['exceltimeline'] == True:
-    print('Not scripted yet.')    
-#    exceltimeline()
+    exceltimeline()
 if config['scriptoptions']['gspreadalldata'] == True:
     alldatatosheets(kaarten,config['spreadsheetid'],config['alldatasheet'])
 if config['scriptoptions']['gspreadtimeline'] == True:
     timelinetosheets(datesdict,config['spreadsheetid'],config['timelinesheet'])
 if config['scriptoptions']['cleandonelists'] == True:
-    print('Not scripted yet.')
-#    cleandonelists()
-
+    cleandonelists()
