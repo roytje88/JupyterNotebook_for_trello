@@ -188,7 +188,7 @@ for i in cardstodelete:
 # Get all actions from the board (if limit of 1000 exceeds, repeat the API request)
 
 actions = []
-before = datetime.now().strftime("%Y-%d-%mT%H:%M:%S"+".000Z")
+before = datetime.now().strftime("%Y-%m-%dT%H:%M:%S"+".000Z")
 x = 1000
 while x == 1000:
     actionsurl = board_url+"/actions?before="+before+"&limit=1000&filter=updateCard&"+keys
