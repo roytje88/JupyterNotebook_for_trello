@@ -10,11 +10,14 @@ import os,json,pprint
 # In[ ]:
 
 
-if os.path.exists('configuration.txt'):
-    with open('configuration.txt') as json_file:
-        config = json.load(json_file)
-else:
-    config = {
+configurationfile = './configuration/configuration.txt'
+credentialsfile = './configuration/credentials.txt'
+
+
+# In[ ]:
+
+
+configoptions = {
         'boardid': '',
         'notstarted': [],
         'blocked': [],
@@ -26,25 +29,43 @@ else:
         'spreadsheetid': '',
         'timelinesheet': '',
         'alldatasheet': '',
-        'googlejsonfile': '',
+        'jsonfilefromgoogle': '',
+        'maxdaysindone': '',
         'scriptoptions': {'excelalldata': False,
                           'gspreadalldata': False,
                           'exceltimeline': False,
                           'gspreadalldata': False,
                           'gspreadtimeline': False,
-                          'cleandonelists': False
+                          'cleandonelists': False,
+                          'removemembersfromdonecards': False
                    }
     }
-if os.path.exists('credentials.txt'):
-    with open('credentials.txt') as json_file:
-        credentials = json.load(json_file)
-else:
-    credentials = {
+credentialsoptions = {
         'api_key': '',
         'api_token': '',
         'gmail': '',
         'gpassword': ''   
     }
+
+
+# In[ ]:
+
+
+if os.path.exists(configurationfile):
+    with open(configurationfile) as json_file:
+        config = json.load(json_file)
+else:
+    config = {}
+    for i,j in configoptions.items():
+        config[i] = j
+        
+if os.path.exists(credentialsfile):
+    with open(credentialsfile) as json_file:
+        credentials = json.load(json_file)
+else:
+    credentials = {}
+    for i,j in credentialsoptions.items():
+        credentials[i] = j
 
 
 # In[ ]:
@@ -71,7 +92,7 @@ def saveconfig():
     answer = input('Save current config? (y/n)')
     if answer.lower() == 'y':
         print('Saving..')
-        updatefile('configuration.txt',config)
+        updatefile(configurationfile,config)
     else:
         answer2 = input('Are you sure? (y/n)')
         if answer2.lower() != 'y':
@@ -80,7 +101,7 @@ def savecreds():
     answer = input('Save current credentials? (y/n)')
     if answer.lower() == 'y':
         print('Saving..')
-        updatefile('credentials.txt',credentials)
+        updatefile(credentialsfile,credentials)
     else:
         answer2 = input('Are you sure? (y/n)')
         if answer2.lower() != 'y':
@@ -178,13 +199,13 @@ def mainmenu():
             elif ans == '2':
                 pprint.pprint(credentials)
             elif ans == '3':
-                createfile('configuration.txt',config)
+                createfile(configurationfile,configoptions)
             elif ans == '4':
-                createfile('credentials.txt', credentials)
+                createfile(credentialsfile, credentialsoptions)
             elif ans == '5':
-                os.remove('configuration.txt')
+                os.remove(configurationfile)
             elif ans == '6':
-                os.remove('credentials.txt')
+                os.remove(credentialsfile)
             elif ans == '7':
                 editor(config)
             elif ans == '8':
@@ -208,6 +229,7 @@ def editor(dicttochange):
         editconfig[str(x)] = (i)
         availableoptions.append(str(x))
         x += 1
+    editconfig['97'] = ('Add new value')
     editconfig['98'] = ('Back to main menu')
     editconfig['99'] = ('Quit')
     for i in editconfig.keys():
@@ -224,6 +246,8 @@ def editor(dicttochange):
             my_quit_fn()
         elif ans == '98':
             mainmenu()
+        elif ans == '97':
+            addnewkey(configoptions,config)
         elif editconfig.get(ans) == 'spreadsheetid':
             googlesheetsconfig()
         else:
@@ -231,6 +255,7 @@ def editor(dicttochange):
                 updatejson(editconfig.get(ans),dicttochange)
             except:
                 invalid()
+                editor(dicttochange)
     else:
         invalid()
         editor(dicttochange)
@@ -246,12 +271,12 @@ def googlesheetsconfig():
     
     print ('First go to: https://gspread.readthedocs.io/en/latest/oauth2.html')
     print('And follow instructions to download the JSON.')
-    print('Place the JSON into the same folder as this script.')
+    print('Place the JSON into the folder \'configuration\'.')
     jsonfilefromgoogle = input('Give the name for the JSON (ex.: jsonFileFromGoogle.json)')
-    config['jsonfilefromgoogle'] = jsonfilefromgoogle
+    config['jsonfilefromgoogle'] = './configuration/' + jsonfilefromgoogle
     spreadsheetid = spreadsheeturltoid(input('Create a new Sheets File and paste the URL.'))
     config['spreadsheetid'] = spreadsheetid
-    with open(jsonfilefromgoogle) as json_file:
+    with open(config['jsonfilefromgoogle']) as json_file:
         googlecreds = json.load(json_file)
     config['googleclientemail'] = googlecreds.get('client_email')
     print('Share your spreadsheet with '+ '\''+googlecreds.get('client_email')+'\'')
@@ -268,6 +293,44 @@ def spreadsheeturltoid(url):
             stop = i
             break
     return spreadsheetid[0:stop]
+
+
+# In[ ]:
+
+
+def addnewkey(options,dicttoadd):
+    print('Add new value')
+    print()
+    editconfig = {}
+    x = 1
+    availableoptions = []
+    for i in options:
+        if i not in dicttoadd:
+            editconfig[str(x)] = (i)
+            availableoptions.append(str(x))
+            x += 1
+    editconfig['98'] = ('Back to main menu')
+    editconfig['99'] = ('Quit')
+    for i in editconfig.keys():
+        if 1 <= int(i) <= 60:
+            print(i+": "+editconfig[i])
+    print()
+    print('Other options')
+    for i in editconfig.keys():
+        if int(i)>60:
+            print(i+": "+editconfig[i])
+    ans = input('Make a choice')
+    if ans in editconfig.keys():
+        if ans == '99':
+            my_quit_fn()
+        elif ans == '98':
+            mainmenu()
+        else:
+            try:
+                dicttoadd[editconfig.get(ans)] = input('Value: ')
+            except:
+                pass
+        
 
 
 # In[ ]:
