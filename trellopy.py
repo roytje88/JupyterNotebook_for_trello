@@ -80,7 +80,7 @@ def dateCalc(date):
 # In[ ]:
 
 
-customfields_dict = {}
+customfields_dict = {'date': {},'list': {}, 'text': {}, 'number': {}, 'checkbox': {}}
 for i in customfields:
     customfields_dict[i['type']] = {}
 for i in customfields:
@@ -646,7 +646,7 @@ def cleandonelists():
 
 def removemembers():
     for i,j in kaarten.items():
-        if j['status'] == 'Done':
+        if j['status'] in ['Done','Archived']:
             try:
                 for k,l in j['members'].items():
                     url = 'https://api.trello.com/1/cards/'+i+'/idMembers/'+k

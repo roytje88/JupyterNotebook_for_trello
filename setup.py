@@ -83,7 +83,7 @@ else:
 def createfile(file,data):
     if not os.path.exists(file):
         with open(file, 'w') as outfile:
-            json.dump(data, outfile)
+            json.dump(data, outfile, indent=4, sort_keys=True)
     else:
         answer = input('File already exists. Overwrite? (y/n)')
         if answer.lower() == 'y':
