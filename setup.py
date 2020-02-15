@@ -10,6 +10,15 @@ import os,json,pprint
 # In[ ]:
 
 
+try:
+    temp = os.stat('./configuration')
+except:
+    os.mkdir('./configuration')
+
+
+# In[ ]:
+
+
 configurationfile = './configuration/configuration.txt'
 credentialsfile = './configuration/credentials.txt'
 
