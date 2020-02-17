@@ -205,8 +205,8 @@ class MainWindow(QtWidgets.QMainWindow):
         header = self.optionstable.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setHorizontalHeaderLabels(0,['Option'])
-        # header.setHorizontalHeaderLabels(0, 'Value')
+        # header.setHorizontalHeaderLabels(0,['Option'])
+        # # header.setHorizontalHeaderLabels(0, 'Value')
 
         header = self.liststable.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
