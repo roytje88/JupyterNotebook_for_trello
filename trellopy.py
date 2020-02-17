@@ -43,9 +43,9 @@ else:
 # In[ ]:
 
 
-keys = "key="+credentials.get('api_key')+"&token="+credentials.get('api_token')
+keys = "key="+credentials.get('API key')+"&token="+credentials.get('API token')
 trello_base_url = "https://api.trello.com/1/"
-board_url = trello_base_url+"boards/"+config.get('boardid')
+board_url = trello_base_url+"boards/"+config.get('Board ID')
 url_cards = board_url+"/cards?attachments=true&customFieldItems=true&filter=all&"+keys
 url_lists = board_url+"/lists?filter=all&"+keys
 url_customfields = board_url+"/customFields?"+keys
@@ -101,11 +101,11 @@ for i in customfields:
 
 
 chosenlists = []
-for i in config.get('notstarted'):
+for i in config.get('Not Started'):
     chosenlists.append(i)
-chosenlists.extend(config.get('blocked'))
-chosenlists.extend(config.get('doing'))
-chosenlists.extend(config.get('done'))
+chosenlists.extend(config.get('Blocked'))
+chosenlists.extend(config.get('Doing'))
+chosenlists.extend(config.get('Done'))
 
 
 # ### Create function to get the hashed date from the card ID
@@ -193,13 +193,13 @@ for i,j in kaarten.items():
     j['created'] = date
     for k in lists:
         if j['idlist'] == k['id']: j['list'] = k['name']
-    if j['list'] in config.get('notstarted'):
+    if j['list'] in config.get('Not Started'):
         j['status'] = 'Not started'
-    elif j['list'] in config.get('doing'):
+    elif j['list'] in config.get('Doing'):
         j['status'] = 'Doing'
-    elif j['list'] in config.get('blocked'):
+    elif j['list'] in config.get('Blocked'):
         j['status'] = 'Blocked'
-    elif j['list'] in config.get('done'):
+    elif j['list'] in config.get('Done'):
         j['status'] = 'Done'
     else:
         j['status'] = 'Archived'
@@ -411,14 +411,14 @@ for i,j in kaarten.items():
     if j['status'] == 'Done':
         tmp = []
         for k,l in j['movements'].items():
-            if l['listAfter'] in config['done']:
+            if l['listAfter'] in config['Done']:
                 tmp.append(k)
         j['datedone'] = max(tmp)
 
     if j['status'] != 'Done' or 'Archived':
         tmp = []
         for k,l in j['movements'].items():
-            if l['listAfter'] in config['doing']:
+            if l['listAfter'] in config['Doing']:
                 tmp.append(k)
         if tmp != []:
             j['datestarted'] = min(tmp)
@@ -430,12 +430,12 @@ for i,j in kaarten.items():
     tmp = []
     if j['status'] != 'Blocked':
         for k,l in j['movements'].items():
-            if l['listBefore'] in config['blocked']:
+            if l['listBefore'] in config['Blocked']:
                 tmp.append(k)
                 j['datelastunblocked'] = max(tmp)
     tmp = []
     for k,l in j['movements'].items():
-        if l['listAfter'] in config['blocked']:
+        if l['listAfter'] in config['Blocked']:
             tmp.append(k)
             j['datelastblocked'] = max(tmp)
 
@@ -533,13 +533,14 @@ def exceltimeline():
 
 
 def timelinetosheets(dictionary,sheetid,worksheet):
+    jsonfile = './configuration/'+config['JSON file from Google']
     import gspread
     from df2gspread import df2gspread as d2g
     import oauth2client
     from oauth2client.service_account import ServiceAccountCredentials
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
-    gcredentials = ServiceAccountCredentials.from_json_keyfile_name(config['jsonfilefromgoogle'] , scope)
+    gcredentials = ServiceAccountCredentials.from_json_keyfile_name(jsonfile , scope)
 
     client = gspread.authorize(gcredentials)
     wks = client.open_by_key(sheetid)
@@ -566,13 +567,14 @@ def timelinetosheets(dictionary,sheetid,worksheet):
 
 
 def alldatatosheets(dictionary,sheetid,worksheet):
+    jsonfile = './configuration/'+config['JSON file from Google']
     import gspread
     from df2gspread import df2gspread as d2g
     import oauth2client
     from oauth2client.service_account import ServiceAccountCredentials
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
-    gcredentials = ServiceAccountCredentials.from_json_keyfile_name(config['jsonfilefromgoogle'] , scope)
+    gcredentials = ServiceAccountCredentials.from_json_keyfile_name(jsonfile , scope)
 
     client = gspread.authorize(gcredentials)
     wks = client.open_by_key(sheetid)
@@ -662,18 +664,18 @@ def removemembers():
 # In[ ]:
 
 
-if config['scriptoptions']['excelalldata'] == True:
+if config['Script options']['Output all data to Excel'] == True:
     print('Not scripted yet.')
 #    excelalldata()
-if config['scriptoptions']['exceltimeline'] == True:
+if config['Script options']['Output a timeline to Excel'] == True:
     print('Not scripted yet.')    
 #    exceltimeline()
-if config['scriptoptions']['gspreadalldata'] == True:
-    alldatatosheets(kaarten,config['spreadsheetid'],config['alldatasheet'])
-if config['scriptoptions']['gspreadtimeline'] == True:
-    timelinetosheets(datesdict,config['spreadsheetid'],config['timelinesheet'])
-if config['scriptoptions']['cleandonelists'] == True:
+if config['Script options']['Output all data to Google Sheets'] == True:
+    alldatatosheets(kaarten,config['Google Spreadsheet ID'],config['Google sheetname for all Trello data'])
+if config['Script options']['Output a timeline to Google Sheet'] == True:
+    timelinetosheets(datesdict,config['Google Spreadsheet ID'],config['Google sheetname for timeline'])
+if config['Script options']['Clean the Done lists'] == True:
     cleandonelists()
-if config['scriptoptions']['removemembersfromdonecards'] == True:
+if config['Script options']['Remove members from Done and Archived cards'] == True:
     removemembers()
 
