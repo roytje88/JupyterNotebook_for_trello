@@ -202,6 +202,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.alldatagsheetsbtn.clicked.connect(alldatatosheets)
         self.removemembersbtn.clicked.connect(test)
 
+        header = self.optionstable.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setHorizontalHeaderLabels(0,['Option'])
+        # header.setHorizontalHeaderLabels(0, 'Value')
+
+        header = self.liststable.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
 
 
@@ -235,8 +244,15 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in boards:
             if i['closed'] != True:
                 allboards.append((i['id'],i['name']))
+        currentboard = None
+        if config['Board ID'] != '':
+            for i in allboards:
+                if i[0] == config['Board ID']:
+                    currentboard = i[1]
+        self.comboboxboards.addItem(currentboard)
         for i in allboards:
-            self.comboboxboards.addItem(i[1])
+            if i[1] != currentboard:
+                self.comboboxboards.addItem(i[1])
         self.filloptionstable()
         credentials['API key'] = apikey
         credentials['API token'] = apitoken
@@ -304,9 +320,6 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
         for i,j in listswithstatuses.items():
             rowPosition = self.liststable.rowCount()
-            header = self.liststable.horizontalHeader()
-            header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-            header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
             self.liststable.insertRow(rowPosition)
             self.liststable.setItem(rowPosition , 0, QTableWidgetItem(i))
             self.liststable.setItem(rowPosition , 1, QTableWidgetItem(j))
@@ -335,9 +348,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
         loadconfig()
-        header = self.optionstable.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+
         for i,j in allconfig.items():
             rowPosition = self.optionstable.rowCount()
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1210</width>
-    <height>835</height>
+    <width>1209</width>
+    <height>832</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -321,7 +321,7 @@
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>351</width>
+       <width>571</width>
        <height>351</height>
       </rect>
      </property>
@@ -333,8 +333,8 @@
        <rect>
         <x>10</x>
         <y>30</y>
-        <width>331</width>
-        <height>311</height>
+        <width>551</width>
+        <height>191</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -355,74 +355,74 @@
       <column/>
       <column/>
      </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_8">
-     <property name="geometry">
-      <rect>
-       <x>370</x>
-       <y>30</y>
-       <width>211</width>
-       <height>201</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Set option</string>
-     </property>
-     <widget class="QWidget" name="gridLayoutWidget_2">
+     <widget class="QGroupBox" name="groupBox_8">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>30</y>
-        <width>191</width>
-        <height>171</height>
+        <y>220</y>
+        <width>551</width>
+        <height>121</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="6" column="0">
-        <widget class="QPushButton" name="setoptionbtn">
-         <property name="text">
-          <string>Update option</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Enter value</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QComboBox" name="comboboxoption"/>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Select option</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLineEdit" name="optionvalue">
-         <property name="placeholderText">
-          <string>[Enter new value]</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <property name="title">
+       <string>Set option</string>
+      </property>
+      <widget class="QWidget" name="gridLayoutWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>531</width>
+         <height>91</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="4" column="0">
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="0">
+         <widget class="QComboBox" name="comboboxoption"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="optionvalue">
+          <property name="placeholderText">
+           <string>[Enter new value]</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Enter value</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Select option</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="2">
+         <widget class="QPushButton" name="setoptionbtn">
+          <property name="text">
+           <string>Update option</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
    </widget>
@@ -697,7 +697,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1210</width>
+     <width>1209</width>
      <height>23</height>
     </rect>
    </property>
