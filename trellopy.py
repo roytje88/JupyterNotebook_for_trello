@@ -43,9 +43,9 @@ else:
 # In[ ]:
 
 
-keys = "key="+credentials.get('api_key')+"&token="+credentials.get('api_token')
+keys = "key="+credentials.get('API key')+"&token="+credentials.get('API token')
 trello_base_url = "https://api.trello.com/1/"
-board_url = trello_base_url+"boards/"+config.get('boardid')
+board_url = trello_base_url+"boards/"+config.get('Board ID')
 url_cards = board_url+"/cards?attachments=true&customFieldItems=true&filter=all&"+keys
 url_lists = board_url+"/lists?filter=all&"+keys
 url_customfields = board_url+"/customFields?"+keys
@@ -101,11 +101,11 @@ for i in customfields:
 
 
 chosenlists = []
-for i in config.get('notstarted'):
+for i in config.get('Not Started'):
     chosenlists.append(i)
-chosenlists.extend(config.get('blocked'))
-chosenlists.extend(config.get('doing'))
-chosenlists.extend(config.get('done'))
+chosenlists.extend(config.get('Blocked'))
+chosenlists.extend(config.get('Doing'))
+chosenlists.extend(config.get('Done'))
 
 
 # ### Create function to get the hashed date from the card ID
@@ -193,13 +193,13 @@ for i,j in kaarten.items():
     j['created'] = date
     for k in lists:
         if j['idlist'] == k['id']: j['list'] = k['name']
-    if j['list'] in config.get('notstarted'):
+    if j['list'] in config.get('Not Started'):
         j['status'] = 'Not started'
-    elif j['list'] in config.get('doing'):
+    elif j['list'] in config.get('Doing'):
         j['status'] = 'Doing'
-    elif j['list'] in config.get('blocked'):
+    elif j['list'] in config.get('Blocked'):
         j['status'] = 'Blocked'
-    elif j['list'] in config.get('done'):
+    elif j['list'] in config.get('Done'):
         j['status'] = 'Done'
     else:
         j['status'] = 'Archived'
@@ -411,14 +411,14 @@ for i,j in kaarten.items():
     if j['status'] == 'Done':
         tmp = []
         for k,l in j['movements'].items():
-            if l['listAfter'] in config['done']:
+            if l['listAfter'] in config['Done']:
                 tmp.append(k)
         j['datedone'] = max(tmp)
 
     if j['status'] != 'Done' or 'Archived':
         tmp = []
         for k,l in j['movements'].items():
-            if l['listAfter'] in config['doing']:
+            if l['listAfter'] in config['Doing']:
                 tmp.append(k)
         if tmp != []:
             j['datestarted'] = min(tmp)
@@ -430,12 +430,12 @@ for i,j in kaarten.items():
     tmp = []
     if j['status'] != 'Blocked':
         for k,l in j['movements'].items():
-            if l['listBefore'] in config['blocked']:
+            if l['listBefore'] in config['Blocked']:
                 tmp.append(k)
                 j['datelastunblocked'] = max(tmp)
     tmp = []
     for k,l in j['movements'].items():
-        if l['listAfter'] in config['blocked']:
+        if l['listAfter'] in config['Blocked']:
             tmp.append(k)
             j['datelastblocked'] = max(tmp)
 
@@ -480,6 +480,56 @@ for i,j in datesdict.items():
         if i==k:
             j['In'] = l['In']
             j['Out'] = l['Out']
+
+
+# ### Create the dataframes
+
+# #### Alldata:
+
+# In[ ]:
+
+
+labelslist = []
+for i,j in kaarten.items():
+    for k,l in j.items():
+        if k=='labels' and l != {}:
+            for m,n in l.items():
+                labelslist.append((i,n))
+memberslist = []
+for i,j in kaarten.items():
+    for k,l in j.items():
+        if k=='members' and l !={}:
+            for m,n in l.items():
+                memberslist.append((i,n))
+for i,j in kaarten.items():
+    try:
+        del j['labels']
+    except:
+        pass
+if labelslist != []:
+    columnslabels = ['cardid','label']
+    columnsmembers = ['cardid','member']
+    df1 = pd.DataFrame(data=kaarten).T
+    df2 = pd.DataFrame(data=labelslist,columns=columnslabels)
+    df3 = pd.merge(df1,df2,on='cardid', how='left')
+    df4 = pd.DataFrame(data=memberslist,columns=columnsmembers)
+    alldatadf = pd.merge(df3,df4,on='cardid', how='left')
+
+
+else:
+    columnsmembers = ['cardid','member']
+    df1 = pd.DataFrame(data=kaarten).T
+    df2 = pd.DataFrame(data=memberslist,columns=columnsmembers)
+    alldatadf = pd.merge(df1,df2,on='cardid', how='left')
+alldatadfforsql = alldatadf.drop(columns=['members','attachments','listmovements','movements'])
+
+
+# #### Timeline:
+
+# In[ ]:
+
+
+timelinedf = pd.DataFrame(data=datesdict).T
 
 
 # ### Create function to ouput all cards to excel
@@ -532,15 +582,17 @@ def exceltimeline():
 # In[ ]:
 
 
-def timelinetosheets(dictionary,sheetid,worksheet):
+def timelinetosheets():
+    jsonfile = './configuration/'+config['JSON file from Google']
+    sheetid = config['Google Spreadsheet ID']
+    worksheet = config['Google sheetname for timeline']
     import gspread
     from df2gspread import df2gspread as d2g
     import oauth2client
     from oauth2client.service_account import ServiceAccountCredentials
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
-    gcredentials = ServiceAccountCredentials.from_json_keyfile_name(config['jsonfilefromgoogle'] , scope)
-
+    gcredentials = ServiceAccountCredentials.from_json_keyfile_name(jsonfile , scope)
     client = gspread.authorize(gcredentials)
     wks = client.open_by_key(sheetid)
     x = 0
@@ -553,11 +605,41 @@ def timelinetosheets(dictionary,sheetid,worksheet):
         pass
     if not worksheet in sheetnames:
         tempwks = wks.add_worksheet(title=worksheet, rows="1000", cols="30")
-
-    dataframe = pd.DataFrame(data=dictionary).T
-    d2g.upload(dataframe, sheetid, worksheet, credentials=gcredentials, row_names=True)
+    d2g.upload(timelinedf, sheetid, worksheet, credentials=gcredentials, row_names=True)
     sheet = wks.worksheet(worksheet)
     sheet.update_acell('A1', 'Date')
+
+
+# ### Create function to write to MySQL database
+
+# In[ ]:
+
+
+def dftosql(dataframe,table):
+    import pymysql
+    from sqlalchemy import create_engine
+    user = credentials['MySQL user']
+    passw = credentials['MySQL password']
+    host =  credentials['MySQL server']
+    port = int(credentials['MySQL port'])
+    database = config['MySQL Database name']
+    
+    db = pymysql.connect(host=credentials['MySQL server'], 
+                         port=int(credentials['MySQL port']), 
+                         user=credentials['MySQL user'], 
+                         password=credentials['MySQL password'],
+                         db = config['MySQL Database name'])
+    cur = db.cursor(pymysql.cursors.DictCursor)
+    sql = "CREATE TABLE IF NOT EXISTS %s ( var INT(1) NOT NULL PRIMARY KEY);"
+    cur.execute(sql % table)
+    
+    engine = create_engine("mysql+pymysql://{user}:{pw}@localhost/{db}"
+                       .format(user=user,
+                               pw=passw,
+                               db=database))
+    
+
+    dataframe.to_sql(table, con = engine, if_exists = 'replace', chunksize = 100)
 
 
 # ### Create function to output all data to Google Sheets
@@ -566,13 +648,16 @@ def timelinetosheets(dictionary,sheetid,worksheet):
 
 
 def alldatatosheets(dictionary,sheetid,worksheet):
+    jsonfile = './configuration/'+config['JSON file from Google']
+    sheetid = config['Google Spreadsheet ID']
+    worksheet = config['Google sheetname for all Trello data']
     import gspread
     from df2gspread import df2gspread as d2g
     import oauth2client
     from oauth2client.service_account import ServiceAccountCredentials
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
-    gcredentials = ServiceAccountCredentials.from_json_keyfile_name(config['jsonfilefromgoogle'] , scope)
+    gcredentials = ServiceAccountCredentials.from_json_keyfile_name(jsonfile , scope)
 
     client = gspread.authorize(gcredentials)
     wks = client.open_by_key(sheetid)
@@ -587,40 +672,7 @@ def alldatatosheets(dictionary,sheetid,worksheet):
     if not worksheet in sheetnames:
         tempwks = wks.add_worksheet(title=worksheet, rows="1000", cols="30")
 
-    labelslist = []
-    for i,j in dictionary.items():
-        for k,l in j.items():
-            if k=='labels' and l != {}:
-                for m,n in l.items():
-                    labelslist.append((i,n))
-    memberslist = []
-    for i,j in dictionary.items():
-        for k,l in j.items():
-            if k=='members' and l !={}:
-                for m,n in l.items():
-                    memberslist.append((i,n))
-    for i,j in dictionary.items():
-        try:
-            del j['labels']
-        except:
-            pass
-    if labelslist != []:
-        columnslabels = ['cardid','label']
-        columnsmembers = ['cardid','member']
-        df1 = pd.DataFrame(data=kaarten).T
-        df2 = pd.DataFrame(data=labelslist,columns=columnslabels)
-        df3 = pd.merge(df1,df2,on='cardid', how='left')
-        df4 = pd.DataFrame(data=memberslist,columns=columnsmembers)
-        dataframe = pd.merge(df3,df4,on='cardid', how='left')
-
-
-    else:
-        columnsmembers = ['cardid','member']
-        df1 = pd.DataFrame(data=kaarten).T
-        df2 = pd.DataFrame(data=memberslist,columns=columnsmembers)
-        dataframe = pd.merge(df1,df2,on='cardid', how='left')
-
-    d2g.upload(dataframe, sheetid, worksheet, credentials=gcredentials, row_names=True)
+    d2g.upload(alldatadf, sheetid, worksheet, credentials=gcredentials, row_names=True)
 
 
 # ### Create function to archive cards older than set in configuration
@@ -662,18 +714,22 @@ def removemembers():
 # In[ ]:
 
 
-if config['scriptoptions']['excelalldata'] == True:
+if config['Script options']['Output all data to Excel'] == True:
     print('Not scripted yet.')
 #    excelalldata()
-if config['scriptoptions']['exceltimeline'] == True:
+if config['Script options']['Output a timeline to Excel'] == True:
     print('Not scripted yet.')    
 #    exceltimeline()
-if config['scriptoptions']['gspreadalldata'] == True:
-    alldatatosheets(kaarten,config['spreadsheetid'],config['alldatasheet'])
-if config['scriptoptions']['gspreadtimeline'] == True:
-    timelinetosheets(datesdict,config['spreadsheetid'],config['timelinesheet'])
-if config['scriptoptions']['cleandonelists'] == True:
+# if config['Script options']['Output all data to Google Sheets'] == True:
+#     alldatatosheets(kaarten,config['Google Spreadsheet ID'],config['Google sheetname for all Trello data'])
+# if config['Script options']['Output a timeline to Google Sheet'] == True:
+#     timelinetosheets()
+if config['Script options']['Clean the Done lists'] == True:
     cleandonelists()
-if config['scriptoptions']['removemembersfromdonecards'] == True:
+if config['Script options']['Remove members from Done and Archived cards'] == True:
     removemembers()
+if config['Script options']['Output a timeline to MySQL server'] == True:
+    dftosql(timelinedf,config['MySQL table for timeline'])
+if config['Script options']['Output all data to MySQL server'] == True:
+    dftosql(alldatadfforsql,config['MySQL table for all Trello data'])
 

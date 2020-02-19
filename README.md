@@ -2,7 +2,7 @@
 
 # Why
 This is a python script to read your Trello Board and write it to Google Sheets or an Excel File.
-It is designed to work with Trello boards used for Scrum or Agile. 
+It is designed to work with Trello boards used for Scrum or Agile.
 This script assumes that the selected board has at least one list for:
  - To do (or Backlog)
  - Doing
@@ -11,10 +11,15 @@ This script assumes that the selected board has at least one list for:
 # How to use
 
 ## Setup
+Create a virtualenv and install every package in requirements.txt (pip install -r requirements.txt).
+
 First run setup.py (or the jupyter notebook). This will create a configuration.txt file and a credentials.txt file. These files can be changed by hand without the script, or use the same script to change the values.
 
 ## Run the script
-Run trellopy.py. It loads the configuration file and will look which values are set to True. 
+Run trellopy.py. It loads the configuration file and will look which values are set to True.
+
+## trellopy-gui.py
+It's a work-in-progress, but it uses PyQt5 to create a configuration window. It can also run a few scripts.
 
 ## Options:
 
@@ -40,4 +45,3 @@ WARNING: this script POSTS to Trello using the API!
 ### removemembersfromdonecards
 If turned to true, this script will delete all members of cards that are done.
 WARNING: this script DELETES to Trello using the API!
-
