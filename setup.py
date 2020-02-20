@@ -26,35 +26,10 @@ credentialsfile = './configuration/credentials.txt'
 # In[ ]:
 
 
-configoptions = {
-        'boardid': '',
-        'notstarted': [],
-        'blocked': [],
-        'doing': [],
-        'done': [],
-        'excelfile': '',
-        'toaddr': '',
-        'subj': '',
-        'spreadsheetid': '',
-        'timelinesheet': '',
-        'alldatasheet': '',
-        'jsonfilefromgoogle': '',
-        'maxdaysindone': '',
-        'scriptoptions': {'excelalldata': False,
-                          'gspreadalldata': False,
-                          'exceltimeline': False,
-                          'gspreadalldata': False,
-                          'gspreadtimeline': False,
-                          'cleandonelists': False,
-                          'removemembersfromdonecards': False
-                   }
-    }
-credentialsoptions = {
-        'api_key': '',
-        'api_token': '',
-        'gmail': '',
-        'gpassword': ''   
-    }
+with open('credentialsoptions.txt') as json_file:
+    credentialsoptions = json.load(json_file)
+with open('configoptions.txt') as json_file:
+    configoptions = json.load(json_file)
 
 
 # In[ ]:
@@ -63,18 +38,22 @@ credentialsoptions = {
 if os.path.exists(configurationfile):
     with open(configurationfile) as json_file:
         config = json.load(json_file)
+    configfound=True
 else:
     config = {}
     for i,j in configoptions.items():
         config[i] = j
-        
+    configfound=False
+
 if os.path.exists(credentialsfile):
     with open(credentialsfile) as json_file:
         credentials = json.load(json_file)
+    credentialsfound=True
 else:
     credentials = {}
     for i,j in credentialsoptions.items():
         credentials[i] = j
+    credentialsfound=False
 
 
 # In[ ]:
@@ -282,7 +261,7 @@ def googlesheetsconfig():
     print('And follow instructions to download the JSON.')
     print('Place the JSON into the folder \'configuration\'.')
     jsonfilefromgoogle = input('Give the name for the JSON (ex.: jsonFileFromGoogle.json)')
-    config['jsonfilefromgoogle'] = './configuration/' + jsonfilefromgoogle
+    config['JSON file from Google'] = jsonfilefromgoogle
     spreadsheetid = spreadsheeturltoid(input('Create a new Sheets File and paste the URL.'))
     config['spreadsheetid'] = spreadsheetid
     with open(config['jsonfilefromgoogle']) as json_file:

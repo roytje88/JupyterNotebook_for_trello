@@ -25,17 +25,99 @@ credentialsfile = './configuration/credentials.txt'
 # In[ ]:
 
 
-if os.path.exists(configurationfile):
-    with open(configurationfile) as json_file:
-        config = json.load(json_file)
-else:
-    print('No configuration found. To create one, run Setup!')
+def loadconfig():
+    global config
+    global credentials
+    if os.path.exists(configurationfile):
+        with open(configurationfile) as json_file:
+            config = json.load(json_file)
+    else:
+        print('No configuration found. To create one, run Setup!')
 
-if os.path.exists(credentialsfile):
-    with open(credentialsfile) as json_file:
-        credentials = json.load(json_file)
-else:
-    print('No credentials found. To create one, run Setup!')
+    if os.path.exists(credentialsfile):
+        with open(credentialsfile) as json_file:
+            credentials = json.load(json_file)
+    else:
+        print('No credentials found. To create one, run Setup!')
+loadconfig()
+
+
+# ### Open all options
+
+# In[ ]:
+
+
+with open('credentialsoptions.txt') as json_file:
+    credentialsoptions = json.load(json_file)
+with open('configoptions.txt') as json_file:
+    configoptions = json.load(json_file)
+
+
+# ### Create function to convert config file
+
+# In[ ]:
+
+
+def updateconfig(file,olddict,newdict):
+    newconfig = {}
+    newconfig['Version'] = newdict['Version']
+    ans = input('Old ' + file[16:] + ' found. Update now?')
+    if ans.upper() != 'N':
+        print('This is your old config:')
+        pprint.pprint(olddict)
+        for i,j in newdict.items():
+            if i != 'Version':
+                if type(j)== list:
+                    newconfig[i] = []
+                    value = input('Give the number of lists to add for the status '+i)
+                    if value != '':
+                        try:
+                            x = int('Input one list each time for list '+value)
+                        except:
+                            x = int(input('Not an integer. Please try again.'))
+                        count = 1
+                        if x != 0:
+                            while count <= x:
+                                newconfig[i].append(input(i))
+                                count += 1
+                elif type(j) == dict:
+                    newconfig[i] = {}
+                    for k,l in j.items():
+                        if type(l) == bool:
+                            answer = input(k + ' (Y/N)').upper()
+                            if answer == 'Y':
+                                newconfig[i][k] = True
+                            else:
+                                newconfig[i][k] = False
+                        else:
+                            newconfig[i][k] = input(k)
+                else:
+                    newconfig[i] = input(i)
+        with open(file, 'w') as outfile:
+            json.dump(newconfig,outfile, indent=4, sort_keys=True)
+    else:
+        pass
+
+
+# ### Check which version of the configuration is loaded and ask to update it
+
+# In[ ]:
+
+
+try:
+    version = float(config['Configuration version'])
+except:
+    version = 0.0
+if version == 0.0:
+    updateconfig(configurationfile, config, configoptions)
+    loadconfig()
+try:
+    version = float(credentials['Configuration version'])
+except:
+    version = 0.0
+if version == 0.0:
+    updateconfig(credentialsfile,credentials, credentialsoptions)
+    loadconfig()
 
 
 # ### Create URLs
