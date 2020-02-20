@@ -1,0 +1,24 @@
+{
+    "Blocked": [],
+    "Board ID": "",
+    "Version": "1.0",
+    "Doing": [],
+    "Done": [],
+    "Email address to send": "",
+    "Excel Outputfile": "",
+    "Google Spreadsheet ID": "",
+    "Google sheetname for all Trello data": "",
+    "Google sheetname for timeline": "",
+    "JSON file from Google": "",
+    "Maximum days a card can be in Done": "",
+    "Not Started": [],
+    "Script options": {
+        "Clean the Done lists": false,
+        "Output a timeline to Excel": false,
+        "Output a timeline to Google Sheet": false,
+        "Output all data to Excel": false,
+        "Output all data to Google Sheets": false,
+        "Remove members from Done and Archived cards": false
+    },
+    "Subject of Email": ""
+}
