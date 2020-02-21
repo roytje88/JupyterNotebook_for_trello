@@ -61,38 +61,46 @@ with open('configoptions.txt') as json_file:
 def updateconfig(file,olddict,newdict):
     newconfig = {}
     newconfig['Version'] = newdict['Version']
+    keysnotfoundinolddict = ['Version']
+    for i,j in newdict.items():
+        if i != 'Version':
+            if i in olddict.keys():
+                newconfig[i] = olddict.get(i)
+            else:
+                keysnotfoundinolddict.append(i)
     ans = input('Old ' + file[16:] + ' found. Update now?')
     if ans.upper() != 'N':
         print('This is your old config:')
         pprint.pprint(olddict)
         for i,j in newdict.items():
-            if i != 'Version':
-                if type(j)== list:
-                    newconfig[i] = []
-                    value = input('Give the number of lists to add for the status '+i)
-                    if value != '':
-                        try:
-                            x = int('Input one list each time for list '+value)
-                        except:
-                            x = int(input('Not an integer. Please try again.'))
-                        count = 1
-                        if x != 0:
-                            while count <= x:
-                                newconfig[i].append(input(i))
-                                count += 1
-                elif type(j) == dict:
-                    newconfig[i] = {}
-                    for k,l in j.items():
-                        if type(l) == bool:
-                            answer = input(k + ' (Y/N)').upper()
-                            if answer == 'Y':
-                                newconfig[i][k] = True
-                            else:
-                                newconfig[i][k] = False
+                if i != 'Version':
+                    if i in keysnotfoundinolddict:
+                        if type(j)== list:
+                            newconfig[i] = []
+                            value = input('Give the number of lists to add for the status '+i)
+                            if value != '':
+                                try:
+                                    x = int('Input one list each time for list '+value)
+                                except:
+                                    x = int(input('Not an integer. Please try again.'))
+                                count = 1
+                                if x != 0:
+                                    while count <= x:
+                                        newconfig[i].append(input(i))
+                                        count += 1
+                        elif type(j) == dict:
+                            newconfig[i] = {}
+                            for k,l in j.items():
+                                if type(l) == bool:
+                                    answer = input(k + ' (Y/N)').upper()
+                                    if answer == 'Y':
+                                        newconfig[i][k] = True
+                                    else:
+                                        newconfig[i][k] = False
+                                else:
+                                    newconfig[i][k] = input(k)
                         else:
-                            newconfig[i][k] = input(k)
-                else:
-                    newconfig[i] = input(i)
+                            newconfig[i] = input(i)
         with open(file, 'w') as outfile:
             json.dump(newconfig,outfile, indent=4, sort_keys=True)
     else:
@@ -105,17 +113,17 @@ def updateconfig(file,olddict,newdict):
 
 
 try:
-    version = float(config['Configuration version'])
+    version = float(config['Version'])
 except:
     version = 0.0
-if version == 0.0:
+if version == 0.0 or version < float(configoptions['Version']):
     updateconfig(configurationfile, config, configoptions)
     loadconfig()
 try:
-    version = float(credentials['Configuration version'])
+    version = float(credentials['Version'])
 except:
     version = 0.0
-if version == 0.0:
+if version == 0.0 or version < float(credentialsoptions['Version']):
     updateconfig(credentialsfile,credentials, credentialsoptions)
     loadconfig()
 
@@ -188,6 +196,7 @@ for i in config.get('Not Started'):
 chosenlists.extend(config.get('Blocked'))
 chosenlists.extend(config.get('Doing'))
 chosenlists.extend(config.get('Done'))
+chosenlists.append('Doorlopend')
 
 
 # ### Create function to get the hashed date from the card ID
@@ -259,7 +268,7 @@ if customfields_dict != {}:
                 else:
                     j[customfields_dict['checkbox'][k['idCustomField']].get('name')] = False
             elif k['idCustomField'] in customfields_dict['date'].keys():
-                j[customfields_dict['date'][k['idCustomField']].get('name')] = dateCalc(k['value'].get('date'))
+                j[customfields_dict['date'][k['idCustomField']].get('name')] =  dateCalc(k['value'].get('date')) 
             else:
                 for key in k['value']:
                     j[customfields_dict[key][k['idCustomField']].get('name')] = k['value'].get(key)
@@ -283,6 +292,13 @@ for i,j in kaarten.items():
         j['status'] = 'Blocked'
     elif j['list'] in config.get('Done'):
         j['status'] = 'Done'
+#####
+#####
+##### Change list below ('Doorlopend')!
+#####
+#####
+    elif j['list'] == 'Doorlopend':
+        j['status'] = 'Doorlopend'
     else:
         j['status'] = 'Archived'
     del j['customfields']
@@ -321,6 +337,17 @@ for i,j in kaarten.items():
         cardstodelete.append(i)
     elif j['list'] in liststodelete:
         cardstodelete.append(i)
+
+
+# ### Before deleting, create a dict for the hours calculation
+
+# In[ ]:
+
+
+hours = {}
+for i,j in kaarten.items():
+    if j['list'] == 'Uren':
+        hours[j['name']] = {config['Custom Field for Starting date']: j['Begindatum'], config['Custom Field for End date']: j['Einddatum'], config['Custom Field with hours per month']: j['Uren per maand']}
 
 
 # ### Delete the cards in the object 'cardstodelete'
@@ -434,10 +461,23 @@ for i,j in kaarten.items():
 
 datesdict = {}
 now = datetime.now().date()
-numdays = 400
+numdays = 365
 
 for x in range (0, numdays):
     datesdict[str(now - timedelta(days = x))] = {}
+    datesdict[str(now + timedelta(days = x))] = {}
+
+
+# ### Create a list for the categories
+
+# In[ ]:
+
+
+categories = []
+for i,j in customfields_dict['list'].items():
+    if j['name'] == config['Custom Field for Categories']:
+        for k in j['options'].values():
+            categories.append(k)
 
 
 # ### Determine how many cards were in what list on the dates in the Dates-dictionary
@@ -461,6 +501,28 @@ for i,j in datesdict.items():
                             j[o['listAfter']] += 1
 
 
+# In[ ]:
+
+
+for i,j in datesdict.items():
+    datekey = datetime.strptime(i,'%Y-%m-%d').date()
+    for k,l in hours.items():
+        name = 'Hours ' + k
+        j[name] = 0
+        if l[config['Custom Field for Starting date']].date() <= datekey <= l[config['Custom Field for Ending date']].date():
+            j[name] += int(l[config['Custom Field with hours per month']])/30.4
+    for k in categories:
+        j[k] = 0
+    for l,m in kaarten.items():
+        if m[config['Custom Field for Categories']] in categories:
+            if m['status'] not in ['Archived','Done']:
+                try:
+                    if m[config['Custom Field for Starting date']].date() <= datekey <= m[config['Custom Field for Ending date']].date():
+                        j[m[config['Custom Field for Categories']]] += int(m[config['Custom Field with hours per month']])/30.4
+                except:
+                    pass
+
+
 # ### If all values are zero for a date, that date is useless, so deleting..
 
 # In[ ]:
@@ -470,6 +532,8 @@ datetodelete = []
 for i,j in datesdict.items():
     j['count'] = 0
     for k in chosenlists:
+        j['count'] += j.get(k)
+    for k in categories:
         j['count'] += j.get(k)
     if j['count'] == 0:
         datetodelete.append(i)
