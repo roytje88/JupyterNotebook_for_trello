@@ -720,10 +720,10 @@ if config['Script options']['Output all data to Excel'] == True:
 if config['Script options']['Output a timeline to Excel'] == True:
     print('Not scripted yet.')    
 #    exceltimeline()
-# if config['Script options']['Output all data to Google Sheets'] == True:
-#     alldatatosheets(kaarten,config['Google Spreadsheet ID'],config['Google sheetname for all Trello data'])
-# if config['Script options']['Output a timeline to Google Sheet'] == True:
-#     timelinetosheets()
+if config['Script options']['Output all data to Google Sheets'] == True:
+    alldatatosheets(kaarten,config['Google Spreadsheet ID'],config['Google sheetname for all Trello data'])
+if config['Script options']['Output a timeline to Google Sheet'] == True:
+    timelinetosheets()
 if config['Script options']['Clean the Done lists'] == True:
     cleandonelists()
 if config['Script options']['Remove members from Done and Archived cards'] == True:
