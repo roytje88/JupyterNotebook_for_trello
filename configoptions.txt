@@ -1,7 +1,7 @@
 {
     "Blocked": [],
     "Board ID": "",
-    "Version": "1.0",
+    "Version": "1.3",
     "Doing": [],
     "Done": [],
     "Email address to send": "",
@@ -20,5 +20,11 @@
         "Output all data to Google Sheets": false,
         "Remove members from Done and Archived cards": false
     },
-    "Subject of Email": ""
+    "Subject of Email": "",
+    "List for hours": "",
+    "Custom Field with hours per month": "",
+    "Custom Field for Starting date": "",
+    "Custom Field for Ending date": "",
+    "Custom Field for Categories": ""
+
 }
