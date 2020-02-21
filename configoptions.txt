@@ -1,7 +1,7 @@
 {
     "Blocked": [],
     "Board ID": "",
-    "Version": "1.3",
+    "Version": "1.4",
     "Doing": [],
     "Done": [],
     "Email address to send": "",
@@ -11,9 +11,14 @@
     "Google sheetname for timeline": "",
     "JSON file from Google": "",
     "Maximum days a card can be in Done": "",
+    "MySQL table for all Trello data": "",
+    "MySQL table for timeline": "",
+    "MySQL Database name": "",
     "Not Started": [],
     "Script options": {
         "Clean the Done lists": false,
+        "Output a timeline to MySQL server": false,
+        "Output all data to MySQL server": false,
         "Output a timeline to Excel": false,
         "Output a timeline to Google Sheet": false,
         "Output all data to Excel": false,

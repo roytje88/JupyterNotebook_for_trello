@@ -26,6 +26,48 @@ credentialsfile = './configuration/credentials.txt'
 # In[ ]:
 
 
+configoptions = {
+        'MySQL Database name': '',
+        'MySQL table for all Trello data': '',
+        'MySQL table for timeline': '',
+        'Board ID': '',
+        'Not Started': [],
+        'Blocked': [],
+        'Doing': [],
+        'Done': [],
+        'Excel Outputfile': '',
+        'Email address to send': '',
+        'Subject of Email': '',
+        'Google Spreadsheet ID': '',
+        'Google sheetname for timeline': '',
+        'Google sheetname for all Trello data': '',
+        'JSON file from Google': '',
+        'Maximum days a card can be in Done': '',
+        'Script options': {'Output all data to Excel': False,
+                          'Output all data to Google Sheets': False,
+                          'Output a timeline to Excel': False,
+                          'Output a timeline to Google Sheet': False,
+                          'Clean the Done lists': False,
+                          'Remove members from Done and Archived cards': False,
+                          'Output a timeline to MySQL server': False,
+                          'Output all data to MySQL server': False, 
+                   }
+    }
+credentialsoptions = {
+        'API key': '',
+        'API token': '',
+        'Gmail Address': '',
+        'Gmail password': '',
+        'MySQL server': '',
+        'MySQL port': '',
+        'MySQL user': '',
+        'MySQL password': ''
+    }
+
+
+# In[ ]:
+
+
 with open('credentialsoptions.txt') as json_file:
     credentialsoptions = json.load(json_file)
 with open('configoptions.txt') as json_file:
