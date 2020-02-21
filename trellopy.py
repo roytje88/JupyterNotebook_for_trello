@@ -347,7 +347,7 @@ for i,j in kaarten.items():
 hours = {}
 for i,j in kaarten.items():
     if j['list'] == 'Uren':
-        hours[j['name']] = {config['Custom Field for Starting date']: j['Begindatum'], config['Custom Field for End date']: j['Einddatum'], config['Custom Field with hours per month']: j['Uren per maand']}
+        hours[j['name']] = {config['Custom Field for Starting date']: j['Begindatum'], config['Custom Field for Ending date']: j['Einddatum'], config['Custom Field with hours per month']: j['Uren per maand']}
 
 
 # ### Delete the cards in the object 'cardstodelete'
