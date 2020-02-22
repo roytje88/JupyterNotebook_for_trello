@@ -1,7 +1,9 @@
 {
+    "__Comment": "Dummy to add comments later on",
+    "Always continuing": [],
     "Blocked": [],
     "Board ID": "",
-    "Version": "1.4",
+    "Version": "1.5",
     "Doing": [],
     "Done": [],
     "Email address to send": "",
@@ -23,7 +25,8 @@
         "Output a timeline to Google Sheet": false,
         "Output all data to Excel": false,
         "Output all data to Google Sheets": false,
-        "Remove members from Done and Archived cards": false
+        "Remove members from Done and Archived cards": false,
+        "Calculate hours": false
     },
     "Subject of Email": "",
     "List for hours": "",

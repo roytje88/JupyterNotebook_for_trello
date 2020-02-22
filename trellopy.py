@@ -61,6 +61,7 @@ with open('configoptions.txt') as json_file:
 def updateconfig(file,olddict,newdict):
     newconfig = {}
     newconfig['Version'] = newdict['Version']
+    newconfig['__Comment'] = newdict['__Comment']
     keysnotfoundinolddict = ['Version']
     for i,j in newdict.items():
         if i != 'Version':
@@ -196,7 +197,8 @@ for i in config.get('Not Started'):
 chosenlists.extend(config.get('Blocked'))
 chosenlists.extend(config.get('Doing'))
 chosenlists.extend(config.get('Done'))
-chosenlists.append('Doorlopend')
+if config['Script options']['Calculate hours'] == True:
+    chosenlists.append('Doorlopend')
 
 
 # ### Create function to get the hashed date from the card ID
@@ -292,13 +294,8 @@ for i,j in kaarten.items():
         j['status'] = 'Blocked'
     elif j['list'] in config.get('Done'):
         j['status'] = 'Done'
-#####
-#####
-##### Change list below ('Doorlopend')!
-#####
-#####
-    elif j['list'] == 'Doorlopend':
-        j['status'] = 'Doorlopend'
+    elif j['list'] in config.get('Always continuing'):
+        j['status'] = 'Always continuing'
     else:
         j['status'] = 'Archived'
     del j['customfields']
@@ -473,11 +470,12 @@ for x in range (0, numdays):
 # In[ ]:
 
 
-categories = []
-for i,j in customfields_dict['list'].items():
-    if j['name'] == config['Custom Field for Categories']:
-        for k in j['options'].values():
-            categories.append(k)
+if config['Script options'].get('Calculate hours') == True:
+    categories = []
+    for i,j in customfields_dict['list'].items():
+        if j['name'] == config['Custom Field for Categories']:
+            for k in j['options'].values():
+                categories.append(k)
 
 
 # ### Determine how many cards were in what list on the dates in the Dates-dictionary
@@ -501,26 +499,29 @@ for i,j in datesdict.items():
                             j[o['listAfter']] += 1
 
 
+# ### Do the same for categories (if option is enabled)
+
 # In[ ]:
 
 
-for i,j in datesdict.items():
-    datekey = datetime.strptime(i,'%Y-%m-%d').date()
-    for k,l in hours.items():
-        name = 'Hours ' + k
-        j[name] = 0
-        if l[config['Custom Field for Starting date']].date() <= datekey <= l[config['Custom Field for Ending date']].date():
-            j[name] += int(l[config['Custom Field with hours per month']])/30.4
-    for k in categories:
-        j[k] = 0
-    for l,m in kaarten.items():
-        if m[config['Custom Field for Categories']] in categories:
-            if m['status'] not in ['Archived','Done']:
-                try:
-                    if m[config['Custom Field for Starting date']].date() <= datekey <= m[config['Custom Field for Ending date']].date():
-                        j[m[config['Custom Field for Categories']]] += int(m[config['Custom Field with hours per month']])/30.4
-                except:
-                    pass
+if config['Script options'].get('Calculate hours') == True:
+    for i,j in datesdict.items():
+        datekey = datetime.strptime(i,'%Y-%m-%d').date()
+        for k,l in hours.items():
+            name = 'Hours ' + k
+            j[name] = 0
+            if l[config['Custom Field for Starting date']].date() <= datekey <= l[config['Custom Field for Ending date']].date():
+                j[name] += int(l[config['Custom Field with hours per month']])/30.4
+        for k in categories:
+            j[k] = 0
+        for l,m in kaarten.items():
+            if m[config['Custom Field for Categories']] in categories:
+                if m['status'] not in ['Archived','Done']:
+                    try:
+                        if m[config['Custom Field for Starting date']].date() <= datekey <= m[config['Custom Field for Ending date']].date():
+                            j[m[config['Custom Field for Categories']]] += int(m[config['Custom Field with hours per month']])/30.4
+                    except:
+                        pass
 
 
 # ### If all values are zero for a date, that date is useless, so deleting..
@@ -533,8 +534,9 @@ for i,j in datesdict.items():
     j['count'] = 0
     for k in chosenlists:
         j['count'] += j.get(k)
-    for k in categories:
-        j['count'] += j.get(k)
+    if config['Script options'].get('Calculate hours') == True:
+        for k in categories:
+            j['count'] += j.get(k)
     if j['count'] == 0:
         datetodelete.append(i)
     del j['count']
