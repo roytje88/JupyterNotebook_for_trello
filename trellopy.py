@@ -11,7 +11,7 @@ import pandas as pd
 from datetime import date,datetime,timedelta
 
 
-# ### Set configuration files
+# ### Set configuration files variables
 
 # In[ ]:
 
@@ -20,26 +20,17 @@ configurationfile = './configuration/configuration.txt'
 credentialsfile = './configuration/credentials.txt'
 
 
-# ### Load configuration and credentials
+# ### Create folders if they don't exist
 
 # In[ ]:
 
 
-def loadconfig():
-    global config
-    global credentials
-    if os.path.exists(configurationfile):
-        with open(configurationfile) as json_file:
-            config = json.load(json_file)
-    else:
-        print('No configuration found. To create one, run Setup!')
-
-    if os.path.exists(credentialsfile):
-        with open(credentialsfile) as json_file:
-            credentials = json.load(json_file)
-    else:
-        print('No credentials found. To create one, run Setup!')
-loadconfig()
+def createfolders():
+    try:
+        temp = os.stat('./configuration')
+    except:
+        os.mkdir('./configuration')
+createfolders()
 
 
 # ### Open all options
@@ -53,59 +44,97 @@ with open('configoptions.txt') as json_file:
     configoptions = json.load(json_file)
 
 
+# ### Load configuration and credentials
+
+# In[ ]:
+
+
+def loadconfig():
+    global configfound
+    global credentialsfound
+    global config
+    global credentials
+    if os.path.exists(configurationfile):
+        with open(configurationfile) as json_file:
+            config = json.load(json_file)
+        configfound = True
+    else:
+        config = {}
+        for i,j in configoptions.items():
+            config[i] = j
+            configfound = False
+
+    if os.path.exists(credentialsfile):
+        with open(credentialsfile) as json_file:
+            credentials = json.load(json_file)
+        credentialsfound = True
+    else:
+        credentials = {}
+        for i,j in credentialsoptions.items():
+            credentials[i] = j
+        credentialsfound=False
+loadconfig()
+
+
 # ### Create function to convert config file
 
 # In[ ]:
 
 
 def updateconfig(file,olddict,newdict):
-    newconfig = {}
-    newconfig['Version'] = newdict['Version']
-    newconfig['__Comment'] = newdict['__Comment']
-    keysnotfoundinolddict = ['Version']
-    for i,j in newdict.items():
-        if i != 'Version':
-            if i in olddict.keys():
-                newconfig[i] = olddict.get(i)
-            else:
-                keysnotfoundinolddict.append(i)
-    ans = input('Old ' + file[16:] + ' found. Update now?')
+    ans = input('Old or no ' + file[16:] + ' found. Update now? (Y/N)')
     if ans.upper() != 'N':
         print('This is your old config:')
         pprint.pprint(olddict)
-        for i,j in newdict.items():
-                if i != 'Version':
-                    if i in keysnotfoundinolddict:
-                        if type(j)== list:
-                            newconfig[i] = []
-                            value = input('Give the number of lists to add for the status '+i)
-                            if value != '':
-                                try:
-                                    x = int('Input one list each time for list '+value)
-                                except:
-                                    x = int(input('Not an integer. Please try again.'))
-                                count = 1
-                                if x != 0:
-                                    while count <= x:
-                                        newconfig[i].append(input(i))
-                                        count += 1
-                        elif type(j) == dict:
-                            newconfig[i] = {}
-                            for k,l in j.items():
-                                if type(l) == bool:
-                                    answer = input(k + ' (Y/N)').upper()
-                                    if answer == 'Y':
-                                        newconfig[i][k] = True
-                                    else:
-                                        newconfig[i][k] = False
-                                else:
-                                    newconfig[i][k] = input(k)
-                        else:
-                            newconfig[i] = input(i)
-        with open(file, 'w') as outfile:
-            json.dump(newconfig,outfile, indent=4, sort_keys=True)
-    else:
-        pass
+    newconfig = {}
+    newconfig['Version'] = newdict['Version']
+    newconfig['__Comment'] = newdict['__Comment']
+    keystoupdate = []
+    for i,j in olddict.items():
+        if type(j) == dict:
+            for k,l in j.items():
+                if l == True:
+                    newconfig[i][k] = True
+                else:
+                    keystoupdate.append(k)
+        elif type(j) == list:
+            if j == []:
+                keystoupdate.append(i)
+            else:
+                newconfig[i] = j
+        else:
+            if j != '':
+                newconfig[i] = j
+            else:
+                keystoupdate.append(i)
+    for i,j in newdict.items():
+        if type(j) == list:
+            if i in keystoupdate:
+                newconfig[i] = []
+                value = input('Give the number of lists to add for the status '+i)
+                if value != '0':
+                    try:
+                        x = int(value)
+                    except:
+                        x = int(input('Not an integer. Please try again!'))
+                    count = 1
+                    while count <= x:
+                        newconfig[i].append(input('Give the name of one list each time for the status ' + i))
+                        count += 1
+        elif type(j) == dict:
+            newconfig[i] = {}
+            for k,l in j.items():
+                if k in keystoupdate:
+                    answer = input(k + ' (Y/N)').upper()
+                    if answer == 'Y':
+                        newconfig[i][k] = True
+                    else:
+                        newconfig[i][k] = False
+        else:
+            if i in keystoupdate:
+                newconfig[i] = input(i)
+    with open(file, 'w') as outfile:
+        json.dump(newconfig, outfile, indent=4, sort_keys=True)
 
 
 # ### Check which version of the configuration is loaded and ask to update it
@@ -117,14 +146,14 @@ try:
     version = float(config['Version'])
 except:
     version = 0.0
-if version == 0.0 or version < float(configoptions['Version']):
+if version == 0.0 or version < float(configoptions['Version']) or configfound == False:
     updateconfig(configurationfile, config, configoptions)
     loadconfig()
 try:
     version = float(credentials['Version'])
 except:
     version = 0.0
-if version == 0.0 or version < float(credentialsoptions['Version']):
+if version == 0.0 or version < float(credentialsoptions['Version']) or credentialsfound == False:
     updateconfig(credentialsfile,credentials, credentialsoptions)
     loadconfig()
 
@@ -829,7 +858,7 @@ def alldatatosheets(dictionary,sheetid,worksheet):
 
 
 def cleandonelists():
-    maxdatetime = datetime.now() - timedelta(days = int(config['maxdaysindone']))
+    maxdatetime = datetime.now() - timedelta(days = int(config['Maximum days a card can be in Done']))
     for i,j in kaarten.items():
         if j['status'] == 'Done' and j['closed'] == False:
             if j['datedone'] < maxdatetime:
