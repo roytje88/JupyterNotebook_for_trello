@@ -316,7 +316,7 @@ for i,j in kaarten.items():
     for k in lists:
         if j['idlist'] == k['id']: j['list'] = k['name']
     if j['list'] in config.get('Not Started'):
-        j['status'] = 'Not started'
+        j['status'] = 'Not Started'
     elif j['list'] in config.get('Doing'):
         j['status'] = 'Doing'
     elif j['list'] in config.get('Blocked'):
@@ -528,6 +528,45 @@ for i,j in datesdict.items():
                             j[o['listAfter']] += 1
 
 
+# In[ ]:
+
+
+statuslist = []
+for i,j in kaarten.items():
+    statuslist.append(j['status'])
+statuslist = list(dict.fromkeys(statuslist))
+
+
+# In[ ]:
+
+
+statuses = []
+for i,j in config.items():
+    if type(j) == list:
+        for k in j:
+            statuses.append((k,i))
+
+
+# In[ ]:
+
+
+for i,j in datesdict.items():
+    datekey = datetime.strptime(i, '%Y-%m-%d').date()
+    for k in statuslist:
+        j[str('Status ' + k)] = 0
+    for k,l in j.items():
+        for m in statuses:
+            if k == m[0]:
+                j[str('Status ' + m[1])] += l
+
+
+# In[ ]:
+
+
+df = pd.DataFrame(data=datesdict).T
+df
+
+
 # ### Do the same for categories (if option is enabled)
 
 # In[ ]:
@@ -699,6 +738,76 @@ else:
     df2 = pd.DataFrame(data=memberslist,columns=columnsmembers)
     alldatadf = pd.merge(df1,df2,on='cardid', how='left')
 alldatadfforsql = alldatadf.drop(columns=['members','attachments','listmovements','movements'])
+
+
+# In[ ]:
+
+
+for i in chosenlists:
+    listname = i.replace(" ","_")
+    exec("%s = []" % (listname))
+
+
+# In[ ]:
+
+
+tmp = []
+for i in statuses:
+    tmp.append(i[1].replace(' ','_'))
+    statussen = list(dict.fromkeys(tmp))
+for i in statussen:
+    name = 'Status' +i.replace(" ","_")
+    exec("%s = []" % (name))
+
+
+# ### Set X axis for datescharts
+
+# In[ ]:
+
+
+x = []
+
+for i,j in datesdict.items():
+    x.append(i)
+    
+
+
+# In[ ]:
+
+
+
+for i,j in datesdict.items():
+    x.append(i)
+    for k,l in j.items():
+        if k in chosenlists:
+            for m in chosenlists:
+                if m == k:
+                    exec("%s.append(l)" % (k.replace(" ","_")))
+        
+
+
+# In[ ]:
+
+
+# import plotly.graph_objects as go
+
+
+# In[ ]:
+
+
+# layout = go.Layout(barmode='stack')
+# fig = go.Figure(layout=layout, data=[go.Bar(name=chosenlists[0],x=x,y=Nieuw)])
+# for i in chosenlists:
+#     if i != chosenlists[0]:
+#         if i not in config.get('Done'):
+#             listname = i.replace(' ','_')
+#             exec ("fig.add_trace(go.Bar(name=i,x=x,y=%s))" % (listname))
+
+
+# In[ ]:
+
+
+# fig.show()
 
 
 # #### Timeline:

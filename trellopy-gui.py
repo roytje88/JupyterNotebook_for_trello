@@ -231,6 +231,8 @@ class MainWindow(QtWidgets.QMainWindow):
         ## Create methods for actions
 
     def getboards(self):
+        global currentboard
+        global boardid
         try:
             self.comboboxboards.clear()
         except:
@@ -249,6 +251,8 @@ class MainWindow(QtWidgets.QMainWindow):
             for i in allboards:
                 if i[0] == config['Board ID']:
                     currentboard = i[1]
+
+
         self.comboboxboards.addItem(currentboard)
         for i in allboards:
             if i[1] != currentboard:
@@ -256,6 +260,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filloptionstable()
         credentials['API key'] = apikey
         credentials['API token'] = apitoken
+        print(allboards[0][1])
+        updatefile(configurationfile,config)
         updatefile(credentialsfile,credentials)
 
     def board_combobox_changed(self, value):
@@ -268,7 +274,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     writetoconfig()
                     self.filloptionstable()
         else:
-            boardid = None
+            boardid = allboards[0][0]
         self.getlists()
 
     def getlists(self):
@@ -277,6 +283,11 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
         global alllists
+        global boardid
+        try:
+            test=boardid
+        except:
+            boardid = allboards[0][0]
         apikey = self.apikey.text()
         apitoken = self.apitoken.text()
         url = 'https://api.trello.com/1/boards/'+boardid+'/lists?key='+apikey+'&token='+apitoken
