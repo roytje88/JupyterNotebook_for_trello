@@ -2,3 +2,6 @@
 .ipynb_checkpoints/
 output/
 configuration/
+
+#Visual Studio
+.vscode/
