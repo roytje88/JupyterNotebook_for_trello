@@ -731,8 +731,8 @@ dumpjson('statuses.json', statuses)
 dumpjson('statuslist.json', statuslist)
 dumpjson('members.json', members)
 dumpjson('labels.json', labels)
-dumpjson('kaarten.json', labels)
-dumpjson('timeline.json', labels)
+dumpjson('kaarten.json', jsoncards)
+dumpjson('timeline.json', datesdict)
 
 
 # In[ ]:
