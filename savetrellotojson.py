@@ -532,6 +532,33 @@ for i,j in datesdict.items():
                             j[o['listAfter']] += 1
 
 
+# ### Do the same for categories (if option is enabled)
+
+# In[ ]:
+
+
+if config['Script options'].get('Calculate hours') == True:
+    for i,j in datesdict.items():
+        datekey = datetime.strptime(i,'%Y-%m-%d').date()
+        for k,l in hours.items():
+            name = 'Hours ' + k
+            j[name] = 0
+            if l[config['Custom Field for Starting date']].date() <= datekey <= l[config['Custom Field for Ending date']].date():
+                j[name] += int(l[config['Custom Field with hours per month']])/30.4
+        for k in categories:
+            j[k] = 0
+        for l,m in kaarten.items():
+            if m[config['Custom Field for Categories']] in categories:
+                if m['status'] not in ['Archived','Done']:
+                    try:
+                        if m[config['Custom Field for Starting date']].date() <= datekey <= m[config['Custom Field for Ending date']].date():
+                            j[m[config['Custom Field for Categories']]] += int(m[config['Custom Field with hours per month']])/30.4
+                    except:
+                        pass
+
+
+# ### Create extra dictionaries to dump to JSON later
+
 # In[ ]:
 
 
@@ -562,31 +589,6 @@ for i,j in datesdict.items():
         for m in statuses:
             if k == m[0]:
                 j[str('Status ' + m[1])] += l
-
-
-# ### Do the same for categories (if option is enabled)
-
-# In[ ]:
-
-
-if config['Script options'].get('Calculate hours') == True:
-    for i,j in datesdict.items():
-        datekey = datetime.strptime(i,'%Y-%m-%d').date()
-        for k,l in hours.items():
-            name = 'Hours ' + k
-            j[name] = 0
-            if l[config['Custom Field for Starting date']].date() <= datekey <= l[config['Custom Field for Ending date']].date():
-                j[name] += int(l[config['Custom Field with hours per month']])/30.4
-        for k in categories:
-            j[k] = 0
-        for l,m in kaarten.items():
-            if m[config['Custom Field for Categories']] in categories:
-                if m['status'] not in ['Archived','Done']:
-                    try:
-                        if m[config['Custom Field for Starting date']].date() <= datekey <= m[config['Custom Field for Ending date']].date():
-                            j[m[config['Custom Field for Categories']]] += int(m[config['Custom Field with hours per month']])/30.4
-                    except:
-                        pass
 
 
 # ### If all values are zero for a date, that date is useless, so deleting..
@@ -707,7 +709,7 @@ for i,j in kaarten.items():
     jsoncards[i] = {}
     for k,l in j.items():
         if type(l) == datetime:
-            jsoncards[i][k] = l.strftime("%Y-%m-%d, %H:%M:%S")
+            jsoncards[i][k] = 'date, ' + l.strftime("%Y-%m-%d, %H:%M:%S")
         else:
             jsoncards[i][k] = l
 
@@ -715,14 +717,20 @@ for i,j in kaarten.items():
 # In[ ]:
 
 
-kaartenjson = './data/kaarten.json'
-timelinejson = './data/timeline.json'
+def dumpjson(file, data):
+    with open('./data/'+file, 'w') as outfile:
+        json.dump(data, outfile, indent=4, sort_keys=True)
 
-with open(kaartenjson, 'w') as outfile:
-    json.dump(jsoncards, outfile, indent=4, sort_keys=True)
 
-with open(timelinejson, 'w') as outfile:
-    json.dump(datesdict, outfile, indent=4, sort_keys=True)
+# In[ ]:
+
+
+dumpjson('customfields.json', customfields_dict)
+dumpjson('chosenlists.json', chosenlists)
+dumpjson('statuses.json', statuses)
+dumpjson('statuslist.json', statuslist)
+dumpjson('members.json', members)
+dumpjson('labels.json', labels)
 
 
 # In[ ]:
@@ -732,11 +740,4 @@ string = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
 text_file = open("./data/date.txt", "w")
 n = text_file.write(string)
 text_file.close()
-
-
-# In[ ]:
-
-
-
-print(string)
 
