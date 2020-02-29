@@ -9,3 +9,6 @@ configuration.txt
 credentials.txt
 developer/
 data/
+
+#Visual Studio
+.vscode/
