@@ -61,7 +61,7 @@ python-dateutil==2.8.1
 pytz==2019.3
 pyzmq==18.1.1
 requests==2.22.0
-rsa==4.0
+rsa==4.7
 ruamel.yaml==0.16.10
 ruamel.yaml.clib==0.2.0
 Send2Trash==1.5.0
